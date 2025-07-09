@@ -1,22 +1,29 @@
-# Backend Dockerfile
-FROM node:16-alpine
+# Etapa 1: Build
+FROM node:18 AS builder
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
-# Copy package files first to leverage Docker cache
 COPY package*.json ./
-
-# Install dependencies
 RUN npm install
 
-# Copy the rest of the application
 COPY . .
 
-# Build the TypeScript code
+# Transpila o código TypeScript para JS
 RUN npm run build
 
-# Expose the port the app runs on
-EXPOSE 3001
+# Etapa 2: Execução
+FROM node:18
 
-# Command to run the application
-CMD ["npm", "start"]
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm install --only=production
+
+COPY --from=builder /app/dist ./dist
+
+# Define porta de execução
+ENV PORT=10000
+EXPOSE $PORT
+
+# Executa o app já transpilado
+CMD ["npm", "run", "start"]
