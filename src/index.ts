@@ -6,9 +6,20 @@ import cors from 'cors';
 const app = express();
 const PORT = process.env.APP_PORT || 3001;
 
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://ilumeo-frontend-orcin.vercel.app'
+];
+
 app.use(cors({
-  origin: 'http://localhost:3000',
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Origem não permitida pelo CORS'));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
